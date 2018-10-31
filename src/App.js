@@ -12,7 +12,7 @@ class App extends Component {
 		this.state = {
 			posLat: 51,
 			posLong: 123,
-			zoom: 13,
+			zoom: 4,
 			data: [],
 		}
 	}
