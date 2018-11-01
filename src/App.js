@@ -4,11 +4,7 @@ import "./App.css";
 import L from "leaflet";
 import { Map, TileLayer, Marker, Popup } from "react-leaflet";
 import axios from "axios";
-
-// Using an ES6 transpiler like Babel
 import Slider from "react-rangeslider";
-
-// To include the default styles
 import "react-rangeslider/lib/index.css";
 
 class App extends Component {
@@ -16,8 +12,8 @@ class App extends Component {
     super();
 
     this.state = {
-      posLat: 51,
-      posLong: 123,
+      posLat: 41,
+      posLong: 87,
       zoom: 4,
       data: [],
       distance: 1000
@@ -34,10 +30,12 @@ class App extends Component {
         d._source.geoLocation.lat !== undefined &&
         d._source.geoLocation.lon !== undefined
       ) {
+        console.log("size");
+        console.log(d._source.mass_in_g);
         td.push({
           lat: d._source.geoLocation.lat,
           lng: d._source.geoLocation.lon,
-          size: d._source.mass_in_g
+          size: d._source.mass_in_g === "" ? "10" : d._source.mass_in_g
         });
       }
     });
@@ -69,10 +67,6 @@ class App extends Component {
   componentDidMount() {
     this.updateData(this.state.posLat, this.state.posLong, this.state.distance);
 
-    // this.leafletMap.leafletElement.on("move", function(ev) {
-    //   console.log(ev); // ev is an event object (MouseEvent in this case)
-    // });
-
     this.leafletMap.leafletElement.on(
       "click",
       function(ev) {
@@ -88,26 +82,15 @@ class App extends Component {
     this.state.data.map((d, i) => {
       // Text number to int
       let impactInt = parseInt(d.size.replace(/,/g, ""));
-      console.log(parseInt(d.size.replace(/,/g, "")));
+      let iconSize = Math.log10(impactInt) * 3;
 
-      // Default size
-      //let impactSize = 10;
-      // if (impactInt > 10000) {
-      //   impactSize = impactSize + impactInt * 0.0002;
-      //   console.log("wow big");
-      //   console.log(impactSize);
-      // }
-      //
-      // if (impactSize > 100) {
-      //   impactSize = 100;
-      // }
-
-      console.log("log10");
-      console.log(Math.log10(impactInt));
+      if (iconSize < 1) {
+        iconSize = 1;
+      }
 
       const customMarker = L.icon({
         iconUrl: require("./impact-icon.png"),
-        iconSize: [Math.log10(impactInt) * 3, Math.log10(impactInt) * 3]
+        iconSize: [iconSize, iconSize]
       });
 
       elements.push(
@@ -139,12 +122,14 @@ class App extends Component {
             position: "absolute",
             top: 17,
             left: 65,
-            fontSize: 42,
             zIndex: 1000,
             fontWeight: 200
           }}
         >
-          SCTG Dev Summit
+          <div style={{ fontSize: 42 }}>SCTG Dev Summit</div>
+          <div style={{ fontSize: 24, color: "#484848" }}>
+            Meteorite Impacts
+          </div>
         </div>
         <div
           style={{
@@ -156,12 +141,26 @@ class App extends Component {
         >
           <div style={{ width: 50, height: 400 }}>
             <Slider
+              tooltip={false}
               min={0}
               max={5000}
               value={this.state.distance}
               orientation="vertical"
               onChange={this.handleOnChange}
             />
+            <div
+              style={{
+                width: 50,
+                color: "#484848",
+                fontSize: 10,
+                textAlign: "center"
+              }}
+            >
+              Radius
+            </div>
+            <div style={{ width: 50, fontSize: 14, textAlign: "center" }}>
+              {this.state.distance}km
+            </div>
           </div>
         </div>
         <Map
