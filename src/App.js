@@ -1,11 +1,11 @@
 import React, { Component } from "react";
-import logo from "./logo.svg";
 import "./App.css";
 import L from "leaflet";
 import { Map, TileLayer, Marker, Popup } from "react-leaflet";
 import axios from "axios";
 import Slider from "react-rangeslider";
 import "react-rangeslider/lib/index.css";
+import moment from "moment";
 
 class App extends Component {
   constructor(props) {
@@ -35,7 +35,9 @@ class App extends Component {
         td.push({
           lat: d._source.geoLocation.lat,
           lng: d._source.geoLocation.lon,
-          size: d._source.mass_in_g === "" ? "10" : d._source.mass_in_g
+          size: d._source.mass_in_g === "" ? "10" : d._source.mass_in_g,
+          date: d._source.year,
+          name: d._source.name
         });
       }
     });
@@ -99,7 +101,15 @@ class App extends Component {
           icon={customMarker}
           position={[d.lat, d.lng]}
         >
-          <Popup>Size: {d.size}g</Popup>
+          <Popup>
+            <div>
+              {moment
+                .unix(new Date(d.date).getTime() / 1000)
+                .format("MMM D h:mm A YYYY")}
+            </div>
+            <div>{d.name}</div>
+            <div>{d.size}g</div>
+          </Popup>
         </Marker>
       );
     });
